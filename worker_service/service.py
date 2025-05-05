@@ -29,6 +29,14 @@ class WorkerClient:
         """Initialize the worker client with the server address."""
         # Use environment variable for server address, fallback to parameter or default
         self.server_address = server_address or os.environ.get('GRPC_SERVER', 'localhost:50051')
+        
+        # Get polling interval from environment variable (in milliseconds)
+        try:
+            self.polling_interval = float(os.environ.get('POLLING_INTERVAL_MS', '5000')) / 1000.0
+        except ValueError:
+            logger.warning("Invalid POLLING_INTERVAL_MS value, using default 5000ms")
+            self.polling_interval = 5.0
+            
         self.channel = None
         self.stub = None
         self.should_run = True
@@ -114,11 +122,11 @@ class WorkerClient:
                 # If no job is available, wait before polling again
                 else:
                     logger.debug("No job available, waiting before polling again")
-                    time.sleep(5)  # Wait 5 seconds before polling again
+                    time.sleep(self.polling_interval)  # Wait according to polling interval
             
             except Exception as e:
                 logger.error(f"Error in worker loop: {str(e)}")
-                time.sleep(5)  # Wait before retrying
+                time.sleep(self.polling_interval)  # Wait before retrying
     
     def stop(self):
         """Stop the worker loop and clean up."""
