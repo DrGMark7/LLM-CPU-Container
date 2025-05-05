@@ -44,14 +44,12 @@ class WorkerClient:
         
     def connect(self):
         """Connect to the gRPC server."""
-        logger.info(f"Connecting to server at {self.server_address}")
         self.channel = grpc.insecure_channel(self.server_address)
         self.stub = proto.worker_pb2_grpc.WorkerServiceStub(self.channel)
     
     def close(self):
         """Close the gRPC channel."""
         if self.channel:
-            logger.info("Closing connection to server")
             self.channel.close()
             self.channel = None
             self.stub = None
