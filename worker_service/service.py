@@ -5,11 +5,13 @@ import time
 import random
 import logging
 import grpc
+import json
 
 # Add the parent directory to the path so we can import the generated modules
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 # Import the generated gRPC code
+import llm
 import proto.worker_pb2
 import proto.worker_pb2_grpc
 
@@ -75,17 +77,13 @@ class WorkerClient:
     
     def process_job(self, job):
         """Process a job and return the result."""
-        # This is a placeholder function that simulates job processing
-        # In a real implementation, this would perform actual work based on job data
         logger.info(f"Processing job {job.id} with payload: {job.payload}")
+
+        llm_response = llm.get_response(job.payload)
         
-        # Simulate processing time
-        processing_time = random.uniform(0.5, 2.0)
-        time.sleep(processing_time)
+        result = json.dumps(llm_response)
         
-        # Create a simple result based on the job payload
-        result = f"Processed: {job.payload} (took {processing_time:.2f}s)"
-        logger.info(f"Job {job.id} processed. Result: {result}")
+        logger.info(f"Job {job.id} processed.")
         
         return result
     
