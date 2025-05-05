@@ -1,0 +1,46 @@
+syntax = "proto3";
+
+package worker;
+
+option go_package = "github.com/PAFFx/job-poll-queue/proto/worker";
+
+// WorkerService defines the gRPC service for job queue workers
+service WorkerService {
+  // RequestJob allows workers to pull jobs from the queue
+  rpc RequestJob(JobRequest) returns (Job);
+  
+  // CompleteJob allows workers to report job completion with results
+  rpc CompleteJob(JobResult) returns (CompleteResponse);
+}
+
+// JobRequest is an empty request to get a job from the queue
+message JobRequest {
+  // No fields needed for a simple pull request
+}
+
+// Job represents a job to be processed by a worker
+message Job {
+  // Unique job identifier
+  string id = 1;
+  
+  // Job payload (may contain any serialized data)
+  string payload = 2;
+  
+  // Headers associated with the job
+  map<string, string> headers = 3;
+}
+
+// JobResult contains the result of job processing
+message JobResult {
+  // Job ID being completed
+  string job_id = 1;
+  
+  // Result payload from worker processing
+  string payload = 2;
+}
+
+// CompleteResponse is the response to a job completion
+message CompleteResponse {
+  // Whether the completion was successfully recorded
+  bool success = 1;
+} 

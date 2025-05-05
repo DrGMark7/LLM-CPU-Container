@@ -1,0 +1,5 @@
+grpcio==1.71.0
+grpcio-tools==1.71.0
+protobuf==5.29.4
+setuptools==78.1.1
+wheel==0.45.1
