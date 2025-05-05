@@ -26,3 +26,9 @@ Run the worker client using the provided script:
 python cmd/main.py
 ```
 
+Run the worker client using container:
+```
+docker build -t llm-cpu-container .
+docker run --network host llm-cpu-container:latest
+```
+
