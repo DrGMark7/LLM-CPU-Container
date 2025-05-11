@@ -36,7 +36,17 @@ class WorkerClient:
         except ValueError:
             logger.warning("Invalid POLLING_INTERVAL_MS value, using default 5000ms")
             self.polling_interval = 5.0
-            
+
+        try:
+            self.model_path = os.environ.get('MODEL_PATH', 'DeepSeek-R1-Distill-Qwen-32B')
+        except ValueError:
+            logger.warning("Invalid MODEL_PATH value, using default DeepSeek-R1-Distill-Qwen-32B")
+            self.model_path = 'DeepSeek-R1-Distill-Qwen-32B'
+
+        self.llm = llm.LLM(model_path=self.model_path)
+        self.llm.load_model()
+
+
         self.channel = None
         self.stub = None
         self.should_run = True
@@ -85,13 +95,25 @@ class WorkerClient:
         """Process a job and return the result."""
         logger.info(f"Processing job {job.id} with payload: {job.payload}")
 
-        llm_response = llm.get_response(job.payload)
-        
-        result = json.dumps(llm_response)
-        
+        llm_response = self.llm.generate_text(job.payload)
+
         logger.info(f"Job {job.id} processed.")
-        
-        return result
+
+        return json.dumps({
+            "status": "completed",
+            "model": self.model_path,
+            "output": [
+                {
+                "type": "message",
+                "content": [
+                    {
+                    "type": "output_text",
+                    "text": llm_response,
+                    }
+                ]
+                }
+            ],
+        })
     
     def run(self):
         """Main worker loop: continuously poll for jobs and process them."""
